@@ -26,43 +26,52 @@ class ForecastFetcher: NSObject {
         self.urlToFetch = URL(string: api + endPoint + apiKey + latitude + longitude)
     }
 
-    func fetchForecat(completion:(_ fetchedData: FullForecastModel) -> Void) {
-        do {
-            let jsonResponse = try JSON(data: Data(contentsOf: urlToFetch!))
-            if !jsonResponse.isEmpty {
-                let forecast = createForecastModel(jsonResponse: jsonResponse)
-                completion(forecast)
+    func fetchForecat(completion: @escaping (_ fetchedData: FullForecastModel) -> Void) {
+
+        // Asynchronous Http call to your api url, using URLSession:
+        URLSession.shared.dataTask(with: self.urlToFetch!) { (data, response, error) -> Void in
+            // Check if data was received successfully
+            if error == nil && data != nil {
+                do {
+                    // Access specific key with value of type String
+                    let properData = try JSONDecoder().decode(FullForecastModel.self, from: data!)
+                    print(response?.suggestedFilename ?? "")
+                    let forecast = self.createForecastModel(jsonResponse: properData)
+                    completion(forecast)
+                } catch {
+                    // Something went wrong
+                    print("Something went wrong")
+                }
             }
-        } catch {
-        }
+        }.resume()
     }
 
-    func createForecastModel(jsonResponse: JSON) -> FullForecastModel {
+    func createForecastModel(jsonResponse: FullForecastModel) -> FullForecastModel {
 
-        let currentForecastResponse = jsonResponse["currently"]
-        let time = currentForecastResponse["time"].floatValue
-        let summary = currentForecastResponse["summary"].stringValue
-        let icon = chooseProperIcon(icon: currentForecastResponse["icon"].stringValue)
-        let nearestStormDistance = currentForecastResponse["nearestStromDistance"].floatValue
-        let preciptIntensity = currentForecastResponse["precipIntensity"].floatValue
-        let precipIntensityError = currentForecastResponse["precipIntensityError"].floatValue
-        let precipProbability = currentForecastResponse["precipProbabilty"].floatValue
-        let precipType = currentForecastResponse["precipType"].stringValue
-        let temperature = currentForecastResponse["temperature"].doubleValue
-        let apparentTemperature = currentForecastResponse["apparentTemperature"].doubleValue
-        let dewPoint = currentForecastResponse["dewPoint"].doubleValue
-        let humidity = currentForecastResponse["humidity"].floatValue
-        let pressure = currentForecastResponse["pressure"].doubleValue
-        let windSpeed = currentForecastResponse["windSpeed"].doubleValue
-        let windGust = currentForecastResponse["windGust"].doubleValue
-        let windBearing = currentForecastResponse["windBearing"].intValue
-        let cloudCover = currentForecastResponse["cloudCover"].floatValue
-        let uvIndex = currentForecastResponse["uvIndex"].intValue
-        let visibility = currentForecastResponse["visibilty"].doubleValue
-        let ozone = currentForecastResponse["ozone"].floatValue
+        _ = jsonResponse.currently
+        let time = jsonResponse.timezone
+        let summary = jsonResponse.currently.summary
+        let icon = jsonResponse.currently.icon
+        let nearestStormDistance = jsonResponse.currently.nearestStormDistance
+        let preciptIntensity = jsonResponse.currently.precipIntensity
+        let precipIntensityError = jsonResponse.currently.precipIntensityError
+        let precipProbability = jsonResponse.currently.precipProbabilty
+        let precipType = jsonResponse.currently.precipType
+        let temperature = jsonResponse.currently.temperature
+        let apparentTemperature = jsonResponse.currently.apparentTemperature
+        let dewPoint = jsonResponse.currently.dewPoint
+        let humidity = jsonResponse.currently.humidity
+        let pressure = jsonResponse.currently.pressure
+        let windSpeed = jsonResponse.currently.windSpeed
+        let windGust = jsonResponse.currently.windGust
+        let windBearing = jsonResponse.currently.windBearing
+        let cloudCover = jsonResponse.currently.cloudCover
+        let uvIndex = jsonResponse.currently.uvIndex
+        let visibility = jsonResponse.currently.visibility
+        let ozone = jsonResponse.currently.ozone
 
         var currentForecastModel = CurrentForecastModel()
-        currentForecastModel.time = time
+        currentForecastModel.time = Double(time)
         currentForecastModel.summary = summary
         currentForecastModel.icon = icon
         currentForecastModel.nearestStormDistance = nearestStormDistance
@@ -83,15 +92,15 @@ class ForecastFetcher: NSObject {
         currentForecastModel.visibility = visibility
         currentForecastModel.ozone = ozone
 
-        let forecast = FullForecastModel(latitude: jsonResponse["latitude"].floatValue,
-                                         longitude: jsonResponse["longitude"].floatValue,
-                                         timezone: jsonResponse["timezone"].stringValue,
+        let forecast = FullForecastModel(latitude: jsonResponse.latitude,
+                                         longitude: jsonResponse.longitude,
+                                         timezone: time,
                                          currently: currentForecastModel)
 
         return forecast
     }
 
-    func chooseProperIcon(icon: String) -> UIImage? {
+    public func chooseProperIcon(icon: String) -> UIImage? {
 
         var finalImage: UIImage?
         let imageDictionary = ["clear-night": "moon.stars",

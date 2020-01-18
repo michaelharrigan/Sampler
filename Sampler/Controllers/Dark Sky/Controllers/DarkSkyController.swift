@@ -61,28 +61,31 @@ class DarkSkyController: UIViewController, Storyboarded {
                     latitude: "\(self.sharedLocation.location?.coordinate.latitude ?? 0)")
                 forecastObject.fetchForecat { (forecast) in
                     let currentForecast = forecast.currently
+                    DispatchQueue.main.async {
+
                     let roundedTemperature = Int(String(format: "%.0f",
-                                                        forecast.currently.temperature.rounded()))
+                                                        forecast.currently.temperature!.rounded()))
                     self.temperatureLabel!.text = "\(roundedTemperature ?? 0)°"
-                    self.icon.image = forecast.currently.icon
-                    self.summary!.text = "Summary: \(currentForecast.summary)"
-                    self.nearestStromDistance!.text = "Nearest Storm Distance: \(currentForecast.nearestStormDistance)"
-                    self.precipIntensity!.text = "Precip Intensity: \(currentForecast.precipIntensity)"
-                    self.precipIntensityError!.text = "Precip Intensity Error: \(currentForecast.precipIntensityError)"
-                    self.precipProbabilty!.text = "Precip Probability: \(currentForecast.precipProbabilty)"
-                    self.precipType!.text = "Precip Type: \(currentForecast.precipType)"
-                    self.apparentTemperature!.text = "Feels Like: \(currentForecast.apparentTemperature)"
-                    self.dewPoint!.text = "Dew Point: \(currentForecast.dewPoint)"
-                    self.humidity!.text = "Humidity: \(currentForecast.humidity)"
-                    self.pressure!.text = "Pressure: \(currentForecast.pressure)"
-                    self.windSpeed!.text = "Wind Speed: \(currentForecast.windSpeed)"
-                    self.windGust!.text = "Wind Gust: \(currentForecast.windGust)"
-                    self.windBearing!.text = "Windbearing: \(currentForecast.windBearing)"
-                    self.cloudCover!.text = "Cloud Cover: \(currentForecast.cloudCover)"
-                    self.uvIndex!.text = "UV Index: \(currentForecast.uvIndex)"
-                    self.visibilty!.text = "Visibilty: \(currentForecast.visibility)"
-                    self.ozone!.text = "Ozone: \(currentForecast.ozone)"
+                    self.icon.image = forecastObject.chooseProperIcon(icon: forecast.currently.icon!)
+                    self.summary!.text = "Summary: \(currentForecast.summary ?? "Not Available")"
+                    self.nearestStromDistance!.text = "Nearest Storm Distance: \(currentForecast.nearestStormDistance ??  0)"
+                    self.precipIntensity!.text = "Precip Intensity: \(currentForecast.precipIntensity ??  0)"
+                    self.precipIntensityError!.text = "Precip Intensity Error: \(currentForecast.precipIntensityError ??  0)"
+                    self.precipProbabilty!.text = "Precip Probability: \(currentForecast.precipProbabilty ??  0)"
+                        self.precipType!.text = "Precip Type: \(currentForecast.precipType?.rawValue ?? "N/A")"
+                    self.apparentTemperature!.text = "Feels Like: \(currentForecast.apparentTemperature ?? 0)"
+                    self.dewPoint!.text = "Dew Point: \(currentForecast.dewPoint ??  0)"
+                    self.humidity!.text = "Humidity: \(currentForecast.humidity ??  0)"
+                    self.pressure!.text = "Pressure: \(currentForecast.pressure ??  0)"
+                    self.windSpeed!.text = "Wind Speed: \(currentForecast.windSpeed ??  0)"
+                    self.windGust!.text = "Wind Gust: \(currentForecast.windGust ?? 0)"
+                    self.windBearing!.text = "Windbearing: \(currentForecast.windBearing ?? 0)"
+                    self.cloudCover!.text = "Cloud Cover: \(currentForecast.cloudCover ??  0)"
+                    self.uvIndex!.text = "UV Index: \(currentForecast.uvIndex ?? 0)"
+                    self.visibilty!.text = "Visibilty: \(currentForecast.visibility ?? 0)"
+                    self.ozone!.text = "Ozone: \(currentForecast.ozone ?? 0)"
                     self.activityIndicator.stopAnimating()
+                    }
                 }
             case .failure:
                 print("FAIL")
