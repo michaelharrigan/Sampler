@@ -5,7 +5,7 @@
 //  Created by Michael Harrigan on 12/27/19.
 //  Copyright © 2019 Michael Harrigan. All rights reserved.
 //
-// swiftlint:disable function_body_length
+
 import Foundation
 import SwiftyJSON
 
@@ -28,19 +28,23 @@ class ForecastFetcher: NSObject {
 
     func fetchForecat(completion: @escaping (_ fetchedData: FullForecastModel) -> Void) {
 
-        // Asynchronous Http call to your api url, using URLSession:
+        // Asynchronous call to Dark Sky API url, using URLSession:
         URLSession.shared.dataTask(with: self.urlToFetch!) { (data, response, error) -> Void in
+
             // Check if data was received successfully
             if error == nil && data != nil {
                 do {
-                    // Access specific key with value of type String
-                    let properData = try JSONDecoder().decode(FullForecastModel.self, from: data!)
-                    print(response?.suggestedFilename ?? "")
-                    let forecast = self.createForecastModel(jsonResponse: properData)
+                    // Data we are going to use
+                    let responseData = try JSONDecoder().decode(FullForecastModel.self, from: data!)
+
+                    // Create forecast model from the data
+                    let forecast = self.createForecastModel(jsonResponse: responseData)
+
+                    // Send that completion
                     completion(forecast)
                 } catch {
                     // Something went wrong
-                    print("Something went wrong")
+                    // TODO: Proper Errors
                 }
             }
         }.resume()
@@ -48,53 +52,32 @@ class ForecastFetcher: NSObject {
 
     func createForecastModel(jsonResponse: FullForecastModel) -> FullForecastModel {
 
-        _ = jsonResponse.currently
-        let time = jsonResponse.timezone
-        let summary = jsonResponse.currently.summary
-        let icon = jsonResponse.currently.icon
-        let nearestStormDistance = jsonResponse.currently.nearestStormDistance
-        let preciptIntensity = jsonResponse.currently.precipIntensity
-        let precipIntensityError = jsonResponse.currently.precipIntensityError
-        let precipProbability = jsonResponse.currently.precipProbabilty
-        let precipType = jsonResponse.currently.precipType
-        let temperature = jsonResponse.currently.temperature
-        let apparentTemperature = jsonResponse.currently.apparentTemperature
-        let dewPoint = jsonResponse.currently.dewPoint
-        let humidity = jsonResponse.currently.humidity
-        let pressure = jsonResponse.currently.pressure
-        let windSpeed = jsonResponse.currently.windSpeed
-        let windGust = jsonResponse.currently.windGust
-        let windBearing = jsonResponse.currently.windBearing
-        let cloudCover = jsonResponse.currently.cloudCover
-        let uvIndex = jsonResponse.currently.uvIndex
-        let visibility = jsonResponse.currently.visibility
-        let ozone = jsonResponse.currently.ozone
-
+        let currently = jsonResponse.currently
         var currentForecastModel = CurrentForecastModel()
-        currentForecastModel.time = Double(time)
-        currentForecastModel.summary = summary
-        currentForecastModel.icon = icon
-        currentForecastModel.nearestStormDistance = nearestStormDistance
-        currentForecastModel.precipIntensity = preciptIntensity
-        currentForecastModel.precipIntensityError = precipIntensityError
-        currentForecastModel.precipProbabilty = precipProbability
-        currentForecastModel.precipType = precipType
-        currentForecastModel.temperature = temperature
-        currentForecastModel.apparentTemperature = apparentTemperature
-        currentForecastModel.dewPoint = dewPoint
-        currentForecastModel.humidity = humidity
-        currentForecastModel.pressure = pressure
-        currentForecastModel.windSpeed = windSpeed
-        currentForecastModel.windGust = windGust
-        currentForecastModel.windBearing = windBearing
-        currentForecastModel.cloudCover = cloudCover
-        currentForecastModel.uvIndex = uvIndex
-        currentForecastModel.visibility = visibility
-        currentForecastModel.ozone = ozone
+        currentForecastModel.time = currently.time
+        currentForecastModel.summary = currently.summary
+        currentForecastModel.icon = currently.icon
+        currentForecastModel.nearestStormDistance = currently.nearestStormDistance
+        currentForecastModel.precipIntensity = currently.precipIntensity
+        currentForecastModel.precipIntensityError = currently.precipIntensityError
+        currentForecastModel.precipProbabilty = currently.precipProbabilty
+        currentForecastModel.precipType = currently.precipType
+        currentForecastModel.temperature = currently.temperature
+        currentForecastModel.apparentTemperature = currently.apparentTemperature
+        currentForecastModel.dewPoint = currently.dewPoint
+        currentForecastModel.humidity = currently.humidity
+        currentForecastModel.pressure = currently.pressure
+        currentForecastModel.windSpeed = currently.windSpeed
+        currentForecastModel.windGust = currently.windGust
+        currentForecastModel.windBearing = currently.windBearing
+        currentForecastModel.cloudCover = currently.cloudCover
+        currentForecastModel.uvIndex = currently.uvIndex
+        currentForecastModel.visibility = currently.visibility
+        currentForecastModel.ozone = currently.ozone
 
         let forecast = FullForecastModel(latitude: jsonResponse.latitude,
                                          longitude: jsonResponse.longitude,
-                                         timezone: time,
+                                         timezone: jsonResponse.timezone,
                                          currently: currentForecastModel)
 
         return forecast
