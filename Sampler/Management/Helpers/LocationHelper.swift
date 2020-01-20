@@ -22,7 +22,7 @@ class LocationHelper: NSObject, CLLocationManagerDelegate {
 
     var requests: [Callback] = [Callback]()
 
-    var location: CLLocation? { return sharedLocationManager.location }
+    var location: CLLocation { return sharedLocationManager.location! }
 
     lazy var sharedLocationManager: CLLocationManager = {
         let newLocationManager = CLLocationManager()

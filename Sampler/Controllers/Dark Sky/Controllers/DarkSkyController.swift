@@ -8,8 +8,11 @@
 
 import UIKit
 
+// swiftlint:disable line_length
 class DarkSkyController: UIViewController, Storyboarded {
 
+    // Take a look at this for design ideas
+    // (https://dribbble.com/search/shots/popular/mobile?q=weather)
     weak var coordinator: MainCoordinator?
     let sharedLocation = LocationHelper.shared
     let activityIndicator: UIActivityIndicatorView = UIActivityIndicatorView()
@@ -52,41 +55,55 @@ class DarkSkyController: UIViewController, Storyboarded {
     }
 
     func setup() {
+
+        // Authorize location if it's not
         sharedLocation.authorize()
+
+        // Get the location once authorized
         LocationHelper.shared.locate { (result) in
+
+            // The result will either be success or failure
             switch result {
+
+            // Success
             case .success(self.sharedLocation):
+
+                // Success with give us a location that I can pass to
+                // the forecast fetcher in initialization
                 let forecastObject = ForecastFetcher.init(longitude:
-                    "\(self.sharedLocation.location?.coordinate.longitude ?? 0)",
-                    latitude: "\(self.sharedLocation.location?.coordinate.latitude ?? 0)")
+                    self.sharedLocation.location.coordinate.longitude,
+                                                          latitude: self.sharedLocation.location.coordinate.latitude)
+
                 forecastObject.fetchForecat { (forecast) in
                     let currentForecast = forecast.currently
                     DispatchQueue.main.async {
 
-                    let roundedTemperature = Int(String(format: "%.0f",
-                                                        forecast.currently.temperature!.rounded()))
-                    self.temperatureLabel!.text = "\(roundedTemperature ?? 0)°"
-                    self.icon.image = forecastObject.chooseProperIcon(icon: forecast.currently.icon!)
-                    self.summary!.text = "Summary: \(currentForecast.summary ?? "Not Available")"
-                    self.nearestStromDistance!.text = "Nearest Storm Distance: \(currentForecast.nearestStormDistance ??  0)"
-                    self.precipIntensity!.text = "Precip Intensity: \(currentForecast.precipIntensity ??  0)"
-                    self.precipIntensityError!.text = "Precip Intensity Error: \(currentForecast.precipIntensityError ??  0)"
-                    self.precipProbabilty!.text = "Precip Probability: \(currentForecast.precipProbabilty ??  0)"
+                        let roundedTemperature = Int(String(format: "%.0f",
+                                                            forecast.currently.temperature!.rounded()))
+                        self.temperatureLabel!.text = "\(roundedTemperature ?? 0)°"
+                        self.icon.image = ForecastModelCreator().chooseProperIcon(icon: forecast.currently.icon!)
+                        self.summary!.text = "Summary: \(currentForecast.summary ?? "Not Available")"
+                        self.nearestStromDistance!.text = "Nearest Storm Distance: \(currentForecast.nearestStormDistance ??  0)"
+                        self.precipIntensity!.text = "Precip Intensity: \(currentForecast.precipIntensity ??  0)"
+                        self.precipIntensityError!.text = "Precip Intensity Error: \(currentForecast.precipIntensityError ??  0)"
+                        self.precipProbabilty!.text = "Precip Probability: \(currentForecast.precipProbabilty ??  0)"
                         self.precipType!.text = "Precip Type: \(currentForecast.precipType?.rawValue ?? "N/A")"
-                    self.apparentTemperature!.text = "Feels Like: \(currentForecast.apparentTemperature ?? 0)"
-                    self.dewPoint!.text = "Dew Point: \(currentForecast.dewPoint ??  0)"
-                    self.humidity!.text = "Humidity: \(currentForecast.humidity ??  0)"
-                    self.pressure!.text = "Pressure: \(currentForecast.pressure ??  0)"
-                    self.windSpeed!.text = "Wind Speed: \(currentForecast.windSpeed ??  0)"
-                    self.windGust!.text = "Wind Gust: \(currentForecast.windGust ?? 0)"
-                    self.windBearing!.text = "Windbearing: \(currentForecast.windBearing ?? 0)"
-                    self.cloudCover!.text = "Cloud Cover: \(currentForecast.cloudCover ??  0)"
-                    self.uvIndex!.text = "UV Index: \(currentForecast.uvIndex ?? 0)"
-                    self.visibilty!.text = "Visibilty: \(currentForecast.visibility ?? 0)"
-                    self.ozone!.text = "Ozone: \(currentForecast.ozone ?? 0)"
-                    self.activityIndicator.stopAnimating()
+                        self.apparentTemperature!.text = "Feels Like: \(currentForecast.apparentTemperature ?? 0)"
+                        self.dewPoint!.text = "Dew Point: \(currentForecast.dewPoint ??  0)"
+                        self.humidity!.text = "Humidity: \(currentForecast.humidity ??  0)"
+                        self.pressure!.text = "Pressure: \(currentForecast.pressure ??  0)"
+                        self.windSpeed!.text = "Wind Speed: \(currentForecast.windSpeed ??  0)"
+                        self.windGust!.text = "Wind Gust: \(currentForecast.windGust ?? 0)"
+                        self.windBearing!.text = "Windbearing: \(currentForecast.windBearing ?? 0)"
+                        self.cloudCover!.text = "Cloud Cover: \(currentForecast.cloudCover ??  0)"
+                        self.uvIndex!.text = "UV Index: \(currentForecast.uvIndex ?? 0)"
+                        self.visibilty!.text = "Visibilty: \(currentForecast.visibility ?? 0)"
+                        self.ozone!.text = "Ozone: \(currentForecast.ozone ?? 0)"
+                        self.activityIndicator.stopAnimating()
                     }
                 }
+
+            // Failure
             case .failure:
                 print("FAIL")
             default: break
